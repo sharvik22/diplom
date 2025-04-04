@@ -11,3 +11,12 @@
 <span style="color:red">Красный текст</span>  
 <span style="color:blue">Синий текст</span>  
 <font color="green">Зелёный текст</font> (устаревший, но иногда работает)  
+
+
+```mermaid
+pie showData
+    title Цвета
+    "Красный" : 30
+    "Синий" : 20
+    "Зелёный" : 50
+```
