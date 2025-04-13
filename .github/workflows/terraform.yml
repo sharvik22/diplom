@@ -47,34 +47,6 @@ jobs:
             -backend-config="endpoint=https://storage.yandexcloud.net" \
             -backend-config="skip_region_validation=true"
 
-      - name: Check and import existing resources
-        id: import
-        continue-on-error: true  # Пропускаем ошибки, если ресурсы не существуют
-        env:
-          YC_TOKEN: ${{ secrets.YC_OAUTH }}
-        run: |
-          # Устанавливаем YC CLI
-          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i /usr/local -n
-          yc config set token $YC_TOKEN
-          yc config set cloud-id ${{ secrets.CLOUD_ID }}
-          yc config set folder-id ${{ secrets.FOLDER_ID }}
-
-          # Проверяем существование ВМ и импортируем их в state
-          if yc compute instance get k8s-master &>/dev/null; then
-            echo "Importing k8s-master..."
-            terraform import yandex_compute_instance.k8s_master $(yc compute instance get k8s-master --format=json | jq -r .id)
-          fi
-
-          if yc compute instance get k8s-worker-1 &>/dev/null; then
-            echo "Importing k8s-worker[0]..."
-            terraform import yandex_compute_instance.k8s_worker[0] $(yc compute instance get k8s-worker-1 --format=json | jq -r .id)
-          fi
-
-          if yc compute instance get k8s-worker-2 &>/dev/null; then
-            echo "Importing k8s-worker[1]..."
-            terraform import yandex_compute_instance.k8s_worker[1] $(yc compute instance get k8s-worker-2 --format=json | jq -r .id)
-          fi
-
       - name: Terraform Validate
         run: terraform validate
 
@@ -90,7 +62,6 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        continue-on-error: true  # Продолжаем даже при ошибках (например, если ресурсы уже существуют)
         env:
           TF_VAR_yc_token: ${{ secrets.YC_OAUTH }}
           TF_VAR_cloud_id: ${{ secrets.CLOUD_ID }}
@@ -98,5 +69,4 @@ jobs:
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
           TF_VAR_service_account_id: ${{ secrets.SERVICE_ACCOUNT_ID }}
           TF_VAR_k8s_security_group_id: ${{ secrets.K8S_SG_ID }}
-        run: |
-          terraform apply -auto-approve -input=false || echo "Apply completed with errors (possibly resources already exist)"
+        run: terraform apply -auto-approve -input=false
