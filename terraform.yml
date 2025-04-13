@@ -1,0 +1,72 @@
+---
+name: Terraform CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: ru-central1
+  TF_STATE_KEY: main-infrastructure/terraform.tfstate
+  TF_VERSION: "1.7.0"
+
+jobs:
+  terraform:
+    name: Terraform Plan/Apply
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        run: |
+          mkdir -p $HOME/.aws
+          printf "[default]\naws_access_key_id=%s\naws_secret_access_key=%s\n" \
+            "${{ secrets.YC_S3_ACCESS_KEY }}" \
+            "${{ secrets.YC_S3_SECRET_KEY }}" > $HOME/.aws/credentials
+          printf "[default]\nregion=%s\nendpoint_url=https://storage.yandexcloud.net\n" \
+            "${{ env.AWS_REGION }}" > $HOME/.aws/config
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.YC_S3_BUCKET_NAME }}" \
+            -backend-config="key=${{ env.TF_STATE_KEY }}" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="endpoint=https://storage.yandexcloud.net" \
+            -backend-config="skip_region_validation=true"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        env:
+          TF_VAR_yc_token: ${{ secrets.YC_OAUTH }}
+          TF_VAR_cloud_id: ${{ secrets.CLOUD_ID }}
+          TF_VAR_folder_id: ${{ secrets.FOLDER_ID }}
+          TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+          TF_VAR_service_account_id: ${{ secrets.SERVICE_ACCOUNT_ID }}
+          TF_VAR_k8s_security_group_id: ${{ secrets.K8S_SG_ID }}
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        env:
+          TF_VAR_yc_token: ${{ secrets.YC_OAUTH }}
+          TF_VAR_cloud_id: ${{ secrets.CLOUD_ID }}
+          TF_VAR_folder_id: ${{ secrets.FOLDER_ID }}
+          TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+          TF_VAR_service_account_id: ${{ secrets.SERVICE_ACCOUNT_ID }}
+          TF_VAR_k8s_security_group_id: ${{ secrets.K8S_SG_ID }}
+        run: terraform apply -auto-approve -input=false

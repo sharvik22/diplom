@@ -1,4 +1,3 @@
-###########
 resource "yandex_compute_instance" "k8s_master" {
   name        = "k8s-master"
   platform_id = "standard-v2"
