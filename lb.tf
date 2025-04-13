@@ -1,3 +1,4 @@
+#############################
 resource "yandex_lb_target_group" "k8s_nodes" {
   name      = "k8s-nodes-target-group"
   region_id = "ru-central1"
