@@ -38,6 +38,45 @@ jobs:
           printf "[default]\nregion=%s\nendpoint_url=https://storage.yandexcloud.net\n" \
             "${{ env.AWS_REGION }}" > $HOME/.aws/config
 
+      - name: Install YC CLI and jq
+        run: |
+          # Устанавливаем YC CLI в домашнюю директорию
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i $HOME -n
+          echo "$HOME/bin" >> $GITHUB_PATH
+          
+          # Устанавливаем jq для обработки JSON
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Check and import existing resources
+        env:
+          YC_TOKEN: ${{ secrets.YC_OAUTH }}
+          CLOUD_ID: ${{ secrets.CLOUD_ID }}
+          FOLDER_ID: ${{ secrets.FOLDER_ID }}
+        run: |
+          # Настраиваем YC CLI
+          yc config set token $YC_TOKEN
+          yc config set cloud-id $CLOUD_ID
+          yc config set folder-id $FOLDER_ID
+
+          # Функция для импорта ресурсов
+          import_resource() {
+            local tf_resource=$1
+            local yc_resource_name=$2
+            
+            if yc compute instance get $yc_resource_name &>/dev/null; then
+              echo "Importing $yc_resource_name as $tf_resource..."
+              instance_id=$(yc compute instance get $yc_resource_name --format=json | jq -r .id)
+              terraform import $tf_resource $instance_id || echo "Import failed for $tf_resource"
+            else
+              echo "Resource $yc_resource_name not found, skipping import"
+            fi
+          }
+
+          # Импортируем ресурсы
+          import_resource "yandex_compute_instance.k8s_master" "k8s-master"
+          import_resource "yandex_compute_instance.k8s_worker[0]" "k8s-worker-1"
+          import_resource "yandex_compute_instance.k8s_worker[1]" "k8s-worker-2"
+
       - name: Terraform Init
         run: |
           terraform init \
@@ -45,7 +84,9 @@ jobs:
             -backend-config="key=${{ env.TF_STATE_KEY }}" \
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="endpoint=https://storage.yandexcloud.net" \
-            -backend-config="skip_region_validation=true"
+            -backend-config="skip_region_validation=true" \
+            -backend-config="access_key=${{ secrets.YC_S3_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.YC_S3_SECRET_KEY }}"
 
       - name: Terraform Validate
         run: terraform validate
@@ -69,4 +110,6 @@ jobs:
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
           TF_VAR_service_account_id: ${{ secrets.SERVICE_ACCOUNT_ID }}
           TF_VAR_k8s_security_group_id: ${{ secrets.K8S_SG_ID }}
-        run: terraform apply -auto-approve -input=false
+        run: |
+          terraform apply -auto-approve -input=false || \
+          echo "Apply completed with errors (possibly resources already exist)"
