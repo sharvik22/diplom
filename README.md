@@ -66,10 +66,10 @@
 * сеть (которая будет использоваться в дальнейшем);
 * группу безопасности;
 
-Локальная проверка и автоматическое исправление
+Локальная проверка и автоматическое исправление:
 * terraform fmt -recursive
 
-Запустите команду для проверки синтаксиса:
+Запустил команду для проверки синтаксиса:
 * terraform validate
 
 ![image](https://github.com/user-attachments/assets/4f98310c-e2b3-4d76-971a-7c93b44def25)
@@ -85,7 +85,7 @@
 * terraform apply
 
 
-У меня есть два скрипта
+У меня есть два скрипта:
 
 * export_network_config.sh - делает инициализацию сети для второго проекта, т.к. буду использовать уже созданную сеть.
   
@@ -103,9 +103,7 @@
 * Выводит переменные для проверки и экспорта.
 * Удаляет временный файл после завершения.
 
-
-
-После выполнения terraform apply. 
+После выполнения terraform apply:
 
 ![image](https://github.com/user-attachments/assets/ebdd608d-5648-436d-a568-e535d3e8ac2f)
 
@@ -167,7 +165,7 @@
 * установил зависимости sudo pip install -r requirements.txt --break-system-packages --ignore-installed
 * скопировал инвентори cp -rfp inventory/sample inventory/mycluster
 
-* установил Helm на локальную машину
+* установил Helm на локальную машину.
 * curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
 * sudo apt-get install apt-transport-https --yes
 * echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
@@ -175,15 +173,15 @@
 * sudo apt-get install helm
 * helm version
 
-* установка дополнительных компонентов
+* установка дополнительных компонентов.
 * nano inventory/mycluster/group_vars/k8s_cluster/addons.yml
 
-# Мониторинг
+### Мониторинг
 * helm_enabled: true
 * metrics_server_enabled: true
 * dashboard_enabled: true
 
-# Логирование
+### Логирование
 * efk_enabled: false
 * elasticsearch_enabled: false
 
@@ -200,7 +198,6 @@
 
 Для сервисного аккаунта создаю  ключ авторизации в формате json через yandex. 
 
-
 Структура проекта:
 
 ![image](https://github.com/user-attachments/assets/c9151889-642a-4f6f-bd86-399dc99bfe61)
@@ -210,7 +207,6 @@
 * хранение стейт файла проекта;
 * создание трех ВМ для кластера;
 * создание Network Load Balancer;
-
 
 После выполнения terraform apply.
 
