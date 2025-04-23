@@ -392,6 +392,7 @@ git push -f origin main
 ### `Решение`
 
 * Создаю namespace
+
 kubectl create namespace monitoring
 
 * С помощью helm произожу установку.
