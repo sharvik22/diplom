@@ -61,10 +61,10 @@
 В каждый проект добавил файл .gitignore.
 
 # service-account-bucket
- - создает бакет;
- - сервисный аккаунт;
- - сеть (которая будет использоваться в дальнейшем);
- - группу безопасности;
+* создает бакет;
+* сервисный аккаунт;
+* сеть (которая будет использоваться в дальнейшем);
+* группу безопасности;
 
 Локальная проверка и автоматическое исправление
 * terraform fmt -recursive
@@ -176,27 +176,27 @@
 * helm version
 
 * установка дополнительных компонентов
-- nano inventory/mycluster/group_vars/k8s_cluster/addons.yml
+* nano inventory/mycluster/group_vars/k8s_cluster/addons.yml
 
 # Мониторинг
-- helm_enabled: true
-- metrics_server_enabled: true
-- dashboard_enabled: true
+* helm_enabled: true
+* metrics_server_enabled: true
+* dashboard_enabled: true
 
 # Логирование
-- efk_enabled: false
-- elasticsearch_enabled: false
+* efk_enabled: false
+* elasticsearch_enabled: false
 
 # Ingress контроллер
-- ingress_nginx_enabled: true
+* ingress_nginx_enabled: true
 
 Так же, сделал экспорт необходимых переменных для бакета и сервисного аккаунта, которые были созданы в первом проекте.
 
-- export TF_VAR_k8s_security_group_id=""
-- export TF_VAR_service_account_id=""
-- export YC_S3_BUCKET_NAME=""
-- export YC_S3_ACCESS_KEY=""
-- export YC_S3_SECRET_KEY=""
+* export TF_VAR_k8s_security_group_id=""
+* export TF_VAR_service_account_id=""
+* export YC_S3_BUCKET_NAME=""
+* export YC_S3_ACCESS_KEY=""
+* export YC_S3_SECRET_KEY=""
 
 Для сервисного аккаунта создаю  ключ авторизации в формате json через yandex. 
 
@@ -207,9 +207,9 @@
 
 
 # main-infrastructure
- - хранение стейт файла проекта;
- - создание трех ВМ для кластера;
- - создание Network Load Balancer;
+* хранение стейт файла проекта;
+* создание трех ВМ для кластера;
+* создание Network Load Balancer;
 
 
 После выполнения terraform apply.
