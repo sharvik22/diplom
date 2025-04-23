@@ -185,7 +185,7 @@
 * efk_enabled: false
 * elasticsearch_enabled: false
 
-# Ingress контроллер
+### Ingress контроллер
 * ingress_nginx_enabled: true
 
 Так же, сделал экспорт необходимых переменных для бакета и сервисного аккаунта, которые были созданы в первом проекте.
@@ -203,7 +203,7 @@
 ![image](https://github.com/user-attachments/assets/c9151889-642a-4f6f-bd86-399dc99bfe61)
 
 
-# main-infrastructure
+### main-infrastructure
 * хранение стейт файла проекта;
 * создание трех ВМ для кластера;
 * создание Network Load Balancer;
@@ -212,28 +212,23 @@
 
 ![image](https://github.com/user-attachments/assets/943278c0-a13f-44ad-9308-c8c761b5f903)
 
-
 Так же запускаю скрипт init-backend.sh для хранения стейт файла второго проекта.
 
 ![image](https://github.com/user-attachments/assets/ba4389e8-6c4c-4e52-8a7e-1e303d890999)
-
 
 Все необходимые компоненты для создания кластера успешно развернуты.
 
 ![image](https://github.com/user-attachments/assets/40cdd1d9-f896-4fb9-a6af-44a87aa93814)
 
-
 Настроил inventory (вывод outputs.tf), ввел данные ip master и workers.
 
 ![image](https://github.com/user-attachments/assets/339f4877-9a76-4a3a-9feb-ab4aad6e5823)
-
 
 Произвел проверку доступности.
 
 * ansible -i inventory/mycluster/inventory.ini all -m ping --become
 
 ![image](https://github.com/user-attachments/assets/6ca3ac46-b08f-4fba-9231-e07f72e8b1eb)
-
 
 Запустил создание кластера.
 
@@ -242,7 +237,6 @@
 ### Итог:
 
 ![image](https://github.com/user-attachments/assets/e08227de-dc30-49f1-9222-e1b5c5ac79bd)
-
 
 Далее настроиваю подключение к кластеру.
 
@@ -259,18 +253,15 @@
 * chmod 600 ~/.kube/config
 * nano ~/.kube/config
 
-
 Настроил SSH-туннеля для доступа к Kubernetes API.
 
 Фоновый режим (с автоподключением).
 
 ssh -f -N -M -S /tmp/kubernetes-tunnel -L 6443:127.0.0.1:6443 ubuntu@84.252.131.153
 
-
 `Ожидаемые результаты:`
 
 ![image](https://github.com/user-attachments/assets/516b23ce-5428-446e-a16c-4ed44522a008)
-
 
 Подключение к master
 
@@ -302,16 +293,13 @@ ssh -f -N -M -S /tmp/kubernetes-tunnel -L 6443:127.0.0.1:6443 ubuntu@84.252.131.
 
 ![image](https://github.com/user-attachments/assets/201167a7-f319-4797-8bfc-9c61b2ba4ad1)
 
-
 * Создал Token для DockerHub.
 
 ![image](https://github.com/user-attachments/assets/c2aa63c7-c328-41fe-94a6-145c45a01a2e)
 
-
  * Экспортировал переменную.
 
  export TF_VAR_dockerhub_token=""
-
 
 * Создал Git репозиторий, настроил ssh авторизацию (nginx-app).
 												
@@ -323,7 +311,6 @@ git clone https://github.com/sharvik22/nginx-app.git
 
 ![image](https://github.com/user-attachments/assets/c0327094-f8db-421f-9490-4a2830f75685)
 
-
 * Произвел сборку образа.
 
 docker build -t sharvik40/nginx-app:latest .
@@ -331,7 +318,6 @@ docker build -t sharvik40/nginx-app:latest .
 ![image](https://github.com/user-attachments/assets/d54242bc-731b-463e-92b7-da2ff3802cfd)
 
 ![image](https://github.com/user-attachments/assets/4e6ed87d-0829-4374-92c2-7774a99b4c0e)
-
 
 * Делаю деплой образа в DockerHub.
 
@@ -342,9 +328,7 @@ docker build -t sharvik40/nginx-app:latest .
 
 ![image](https://github.com/user-attachments/assets/4067be79-101f-4761-a6b8-89e2ea777eeb)
 
-
 * Дополнительная проверка. Удаляю образ и заново скачиваю с DockerHub. Запускаю контейнер локально.
-
 
 ![image](https://github.com/user-attachments/assets/ff5dc312-b6df-412e-8473-1b37efabd1eb)
    
@@ -372,13 +356,11 @@ git remote add origin git@github.com:sharvik22/nginx-app.git
 
 git push -f origin main
 
-
 ### `Ожидаемые результаты:`
 
 * Git репозиторий с тестовым приложением и Dockerfile.
 
 # [git@github.com:sharvik22/nginx-app.git](https://github.com/sharvik22/nginx-app.git)
-
 
 * Регистри с собранным docker image. В качестве регистри может быть DockerHub или [Yandex Container Registry](https://cloud.yandex.ru/services/container-registry), созданный также с помощью terraform.
 
@@ -425,7 +407,6 @@ helm install kube-prometheus prometheus-community/kube-prometheus-stack \
 
 ![image](https://github.com/user-attachments/assets/b302d776-5ca0-42c6-9ec0-065a9d4bea5a)
 
-
 Я использовал балансировщик Network Load Balancer и NodePort т.к. кластер у меня в локальной сети и не имеет публичного IP, я сделал проброс портов приложения и Grafana
 
 Проверка установки:
@@ -435,7 +416,6 @@ helm install kube-prometheus prometheus-community/kube-prometheus-stack \
 kubectl get svc -n monitoring
 
 ![image](https://github.com/user-attachments/assets/0faea3f9-5d4b-494e-94b7-a92fe27693bb)
-
 
 ### Проверить поды
 
@@ -465,8 +445,6 @@ kubectl -n monitoring get secrets kube-prometheus-grafana -o jsonpath="{.data.ad
 
 ![image](https://github.com/user-attachments/assets/838aaadf-bbb8-4a35-a60a-ceaf351750d3)
 
-
-
 # Деплоить тестового приложение.
 
 * Создаю Deployment (nginx-app-deployment.yaml)
@@ -478,7 +456,6 @@ kubectl -n monitoring get secrets kube-prometheus-grafana -o jsonpath="{.data.ad
 * kubectl apply -f nginx-app-service.yaml
 
 ![image](https://github.com/user-attachments/assets/ee8a6f33-eb44-4cc5-8a84-d17c03a998bd)
-
 
 Проверка:
 
@@ -492,18 +469,15 @@ kubectl get pods -l app=nginx-app
 
 ![image](https://github.com/user-attachments/assets/023a75b8-5888-4394-b1a6-f47667022716)
 
-
 Проверить сервис (должен показать 30080 в NodePort)
 
 kubectl get service nginx-app-service
 
 ![image](https://github.com/user-attachments/assets/716d2941-2728-43c6-af96-ae45de82181d)
 
-
 Проверка балансировщика: 
 
 ![image](https://github.com/user-attachments/assets/7c66c552-c4e6-41b4-a026-8aa979303d1f)
-
 
 Тестовое приложение доступно:
 
@@ -511,13 +485,7 @@ kubectl get service nginx-app-service
 
 ![image](https://github.com/user-attachments/assets/282283f9-d0f8-4f95-9327-a6a2809530e3)
 
-
-`Ожидаемые результаты:`
-
-
-
 ---
-
 
 ### 5. `Установка и настройка CI/CD`
 
@@ -544,11 +512,9 @@ mkdir -p .github/workflows
 
 nano .github/workflows/cidi.yml
 
-
 * настраиваю секреты в yandex actions
 
 ![image](https://github.com/user-attachments/assets/627fe63a-3c0a-429a-adda-b219058f23b5)
-
 
 `Ожидаемые результаты:`
 
@@ -559,7 +525,6 @@ nano .github/workflows/cidi.yml
 ![image](https://github.com/user-attachments/assets/ce45d428-6a80-445d-8922-6b6e7146ffd4)
 
 ![image](https://github.com/user-attachments/assets/d30788b7-4da9-4672-8712-395940638aca)
-
 
 'Делаю тег'
 
@@ -572,7 +537,6 @@ nano .github/workflows/cidi.yml
 ![image](https://github.com/user-attachments/assets/04185bb2-bd5f-4403-95e6-91858e945086)
 
 ![image](https://github.com/user-attachments/assets/e13391ec-917f-48d1-8f1c-0736a0467100)
-
 
 Проверим, какой образ сейчас развёрнут.
 
